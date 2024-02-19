@@ -498,19 +498,27 @@ bool CGUIWindowManager::SendMessage(int message, int senderID, int destID, int p
 
 bool CGUIWindowManager::SendMessage(CGUIMessage& message)
 {
+  CLog::Log(LOGINFO, "SendMessage checkpoint 1");
   bool handled = false;
   //  CLog::Log(LOGDEBUG,"SendMessage: mess={} send={} control={} param1={}", message.GetMessage(), message.GetSenderId(), message.GetControlId(), message.GetParam1());
   // Send the message to all none window targets
   for (int i = 0; i < int(m_vecMsgTargets.size()); i++)
   {
+    CLog::Log(LOGINFO, "SendMessage vecMsg loop cp 1");
     IMsgTargetCallback* pMsgTarget = m_vecMsgTargets[i];
 
     if (pMsgTarget)
     {
-      if (pMsgTarget->OnMessage( message )) handled = true;
+      CLog::Log(LOGINFO, "SendMessage vecMsg loop cp 2");
+      if (pMsgTarget->OnMessage( message ))
+      {
+        CLog::Log(LOGINFO, "SendMessage vecMsg loop cp 3");
+        handled = true;
+      }
     }
   }
 
+  CLog::Log(LOGINFO, "SendMessage checkpoint 2");
   //  A GUI_MSG_NOTIFY_ALL is send to any active modal dialog
   //  and all windows whether they are active or not
   if (message.GetMessage()==GUI_MSG_NOTIFY_ALL)
@@ -530,6 +538,7 @@ bool CGUIWindowManager::SendMessage(CGUIMessage& message)
     return true;
   }
 
+  CLog::Log(LOGINFO, "SendMessage checkpoint 3");
   // Normal messages are sent to:
   // 1. All active modeless dialogs
   // 2. The topmost dialog that accepts the message
@@ -563,6 +572,7 @@ bool CGUIWindowManager::SendMessage(CGUIMessage& message)
       topWindow = m_activeDialogs.size();
   }
 
+  CLog::Log(LOGINFO, "SendMessage checkpoint 4");
   // now send to the underlying window
   CGUIWindow* window = GetWindow(GetActiveWindow());
   if (window)
@@ -583,6 +593,7 @@ bool CGUIWindowManager::SendMessage(CGUIMessage& message)
       if (window->OnMessage(message)) handled = true;
     }
   }
+  CLog::Log(LOGINFO, "SendMessage checkpoint 5");
   return handled;
 }
 
@@ -1250,22 +1261,33 @@ void CGUIWindowManager::MarkDirty(const CRect& rect)
 
 void CGUIWindowManager::RenderPass() const
 {
+  CLog::Log(LOGINFO, "GUI RenderPass checkpoint 1");
   CGUIWindow* pWindow = GetWindow(GetActiveWindow());
+  CLog::Log(LOGINFO, "GUI RenderPass checkpoint 2");
   if (pWindow)
   {
+    CLog::Log(LOGINFO, "GUI RenderPass checkpoint 3");
     pWindow->ClearBackground();
+    CLog::Log(LOGINFO, "GUI RenderPass checkpoint 4");
     pWindow->DoRender();
   }
 
+  CLog::Log(LOGINFO, "GUI RenderPass checkpoint 5");
   // we render the dialogs based on their render order.
   auto renderList = m_activeDialogs;
   stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
 
+  CLog::Log(LOGINFO, "GUI RenderPass checkpoint 6");
   for (const auto& window : renderList)
   {
+    CLog::Log(LOGINFO, "GUI RenderPass checkpoint 7");
     if (window->IsDialogRunning())
+    {
+      CLog::Log(LOGINFO, "GUI RenderPass checkpoint 8");
       window->DoRender();
+    }
   }
+  CLog::Log(LOGINFO, "GUI RenderPass checkpoint 9");
 }
 
 void CGUIWindowManager::RenderEx() const
@@ -1288,28 +1310,36 @@ void CGUIWindowManager::RenderEx() const
 
 bool CGUIWindowManager::Render()
 {
+  CLog::Log(LOGINFO, "GUI Render checkpoint 1");
   assert(CServiceBroker::GetAppMessenger()->IsProcessThread());
+  CLog::Log(LOGINFO, "GUI Render checkpoint 2");
   CSingleExit lock(CServiceBroker::GetWinSystem()->GetGfxContext());
 
+  CLog::Log(LOGINFO, "GUI Render checkpoint 3");
   CDirtyRegionList dirtyRegions = m_tracker.GetDirtyRegions();
 
+  CLog::Log(LOGINFO, "GUI Render checkpoint 4");
   bool hasRendered = false;
   // If we visualize the regions we will always render the entire viewport
   if (CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_guiVisualizeDirtyRegions || CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_guiAlgorithmDirtyRegions == DIRTYREGION_SOLVER_FILL_VIEWPORT_ALWAYS)
   {
+    CLog::Log(LOGINFO, "GUI Render checkpoint 5");
     RenderPass();
     hasRendered = true;
   }
   else if (CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_guiAlgorithmDirtyRegions == DIRTYREGION_SOLVER_FILL_VIEWPORT_ON_CHANGE)
   {
+    CLog::Log(LOGINFO, "GUI Render checkpoint 6");
     if (!dirtyRegions.empty())
     {
+      CLog::Log(LOGINFO, "GUI Render checkpoint 7");
       RenderPass();
       hasRendered = true;
     }
   }
   else
   {
+    CLog::Log(LOGINFO, "GUI Render checkpoint 8");
     for (const auto& i : dirtyRegions)
     {
       if (i.IsEmpty())
@@ -1319,19 +1349,25 @@ bool CGUIWindowManager::Render()
       RenderPass();
       hasRendered = true;
     }
+    CLog::Log(LOGINFO, "GUI Render checkpoint 9");
     CServiceBroker::GetWinSystem()->GetGfxContext().ResetScissors();
   }
 
+  CLog::Log(LOGINFO, "GUI Render checkpoint 10");
   if (CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_guiVisualizeDirtyRegions)
   {
+    CLog::Log(LOGINFO, "GUI Render checkpoint 11");
     CServiceBroker::GetWinSystem()->GetGfxContext().SetRenderingResolution(CServiceBroker::GetWinSystem()->GetGfxContext().GetResInfo(), false);
     const CDirtyRegionList &markedRegions  = m_tracker.GetMarkedRegions();
+    CLog::Log(LOGINFO, "GUI Render checkpoint 12");
     for (const auto& i : markedRegions)
       CGUITexture::DrawQuad(i, 0x0fff0000);
+    CLog::Log(LOGINFO, "GUI Render checkpoint 13");
     for (const auto& i : dirtyRegions)
       CGUITexture::DrawQuad(i, 0x4c00ff00);
   }
 
+  CLog::Log(LOGINFO, "GUI Render checkpoint 14");
   return hasRendered;
 }
 
@@ -1413,20 +1449,35 @@ bool CGUIWindowManager::ProcessRenderLoop(bool renderOnly)
 {
   bool renderGui = true;
 
+  CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 1");
   if (CServiceBroker::GetAppMessenger()->IsProcessThread() && m_pCallback)
   {
+    CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 2");
     renderGui = m_pCallback->GetRenderGUI();
     m_iNested++;
+    CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 3");
     if (!renderOnly)
+    {
+      CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 4");
       m_pCallback->Process();
+    }
+    CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 5");
     m_pCallback->FrameMove(!renderOnly);
+    CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 6");
     m_pCallback->Render();
+    CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 7");
     m_iNested--;
   }
   if (g_application.m_bStop || !renderGui)
+  {
+    CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 8");
     return false;
+  }
   else
+  {
+    CLog::Log(LOGINFO, "ProcessRenderLoop checkpoint 9");
     return true;
+  }
 }
 
 void CGUIWindowManager::SetCallback(IWindowManagerCallback& callback)
@@ -1526,10 +1577,15 @@ int CGUIWindowManager::GetTopmostModalDialog(bool ignoreClosing /*= false*/) con
 
 void CGUIWindowManager::SendThreadMessage(CGUIMessage& message, int window /*= 0*/)
 {
+  std::stringstream ss;
+  ss << std::this_thread::get_id();
+  std::string id = ss.str();
+  CLog::Log(LOGINFO, "SendThreadMessage checkpoint 1 {}", id.c_str());
   std::unique_lock<CCriticalSection> lock(m_critSection);
 
   CGUIMessage* msg = new CGUIMessage(message);
   m_vecThreadMessages.emplace_back(msg, window);
+  CLog::Log(LOGINFO, "SendThreadMessage checkpoint 2");
 }
 
 void CGUIWindowManager::DispatchThreadMessages()
@@ -1552,32 +1608,52 @@ void CGUIWindowManager::DispatchThreadMessages()
   // 5. If possible, queued messages can be removed by certain filter condition
   //    and not break above.
 
+  std::stringstream ss;
+  ss << std::this_thread::get_id();
+  std::string id = ss.str();
+  CLog::Log(LOGINFO, "DispatchThreadMessages checkpoint 1: {}", id.c_str());
   std::unique_lock<CCriticalSection> lock(m_critSection);
 
+  CLog::Log(LOGINFO, "DispatchThreadMessages checkpoint 2");
   while (!m_vecThreadMessages.empty())
   {
+    CLog::Log(LOGINFO, "DispatchThreadMessages loop cp 1");
     // pop up one message per time to make messages be processed by order.
     // this will ensure rule No.2 & No.3
     CGUIMessage *pMsg = m_vecThreadMessages.front().first;
     int window = m_vecThreadMessages.front().second;
     m_vecThreadMessages.pop_front();
 
+    CLog::Log(LOGINFO, "DispatchThreadMessages loop cp 2");
     lock.unlock();
 
     // XXX: during SendMessage(), there could be a deeper 'xbmc main loop' inited by e.g. doModal
     //      which may loop there and callback to DispatchThreadMessages() multiple times.
     if (window)
+    {
+      CLog::Log(LOGINFO, "DispatchThreadMessages loop cp 3");
       SendMessage( *pMsg, window );
+    }
     else
+    {
+      CLog::Log(LOGINFO, "DispatchThreadMessages loop cp 4");
       SendMessage( *pMsg );
+    }
     delete pMsg;
 
+    CLog::Log(LOGINFO, "DispatchThreadMessages loop cp 5");
     lock.lock();
+    CLog::Log(LOGINFO, "DispatchThreadMessages loop cp 6");
   }
+  CLog::Log(LOGINFO, "DispatchThreadMessages checkpoint 3");
 }
 
 int CGUIWindowManager::RemoveThreadMessageByMessageIds(int *pMessageIDList)
 {
+  std::stringstream ss;
+  ss << std::this_thread::get_id();
+  std::string id = ss.str();
+  CLog::Log(LOGINFO, "RemoveThreadMessageByMessageIds checkpoint 1: {}", id.c_str());
   std::unique_lock<CCriticalSection> lock(m_critSection);
   int removedMsgCount = 0;
   for (std::list < std::pair<CGUIMessage*,int> >::iterator it = m_vecThreadMessages.begin();
@@ -1599,6 +1675,7 @@ int CGUIWindowManager::RemoveThreadMessageByMessageIds(int *pMessageIDList)
       ++it;
     }
   }
+  CLog::Log(LOGINFO, "RemoveThreadMessageByMessageIds checkpoint 2");
   return removedMsgCount;
 }
 

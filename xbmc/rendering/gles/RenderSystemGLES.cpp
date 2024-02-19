@@ -186,19 +186,25 @@ bool CRenderSystemGLES::EndRender()
 
 bool CRenderSystemGLES::ClearBuffers(UTILS::COLOR::Color color)
 {
+  CLog::Log(LOGINFO, "ClearBuffers checkpoint 1");
   if (!m_bRenderCreated)
     return false;
 
+  CLog::Log(LOGINFO, "ClearBuffers checkpoint 2");
   float r = KODI::UTILS::GL::GetChannelFromARGB(KODI::UTILS::GL::ColorChannel::R, color) / 255.0f;
   float g = KODI::UTILS::GL::GetChannelFromARGB(KODI::UTILS::GL::ColorChannel::G, color) / 255.0f;
   float b = KODI::UTILS::GL::GetChannelFromARGB(KODI::UTILS::GL::ColorChannel::B, color) / 255.0f;
   float a = KODI::UTILS::GL::GetChannelFromARGB(KODI::UTILS::GL::ColorChannel::A, color) / 255.0f;
 
+  CLog::Log(LOGINFO, "ClearBuffers checkpoint 3");
   glClearColor(r, g, b, a);
 
+  CLog::Log(LOGINFO, "ClearBuffers checkpoint 4");
   GLbitfield flags = GL_COLOR_BUFFER_BIT;
+  CLog::Log(LOGINFO, "ClearBuffers checkpoint 5");
   glClear(flags);
 
+  CLog::Log(LOGINFO, "ClearBuffers checkpoint 6");
   return true;
 }
 

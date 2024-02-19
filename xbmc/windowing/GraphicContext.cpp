@@ -582,6 +582,7 @@ void CGraphicContext::ResetScreenParameters(RESOLUTION res)
 
 void CGraphicContext::Clear(UTILS::COLOR::Color color)
 {
+  CLog::Log(LOGINFO, "Clear checkpoint 1");
   CServiceBroker::GetRenderSystem()->ClearBuffers(color);
 }
 
@@ -984,14 +985,18 @@ const std::string& CGraphicContext::GetMediaDir() const
 
 void CGraphicContext::Flip(bool rendered, bool videoLayer)
 {
+  CLog::Log(LOGINFO, "Flip checkpoint 1");
   CServiceBroker::GetRenderSystem()->PresentRender(rendered, videoLayer);
 
+  CLog::Log(LOGINFO, "Flip checkpoint 2");
   if(m_stereoMode != m_nextStereoMode)
   {
+    CLog::Log(LOGINFO, "Flip checkpoint 3");
     m_stereoMode = m_nextStereoMode;
     SetVideoResolution(GetVideoResolution(), true);
     CServiceBroker::GetGUI()->GetWindowManager().SendMessage(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_RENDERER_RESET);
   }
+  CLog::Log(LOGINFO, "Flip checkpoint 4");
 }
 
 void CGraphicContext::GetAllowedResolutions(std::vector<RESOLUTION> &res)

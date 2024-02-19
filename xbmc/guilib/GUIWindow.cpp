@@ -343,18 +343,24 @@ void CGUIWindow::DoProcess(unsigned int currentTime, CDirtyRegionList &dirtyregi
 
 void CGUIWindow::DoRender()
 {
+  CLog::Log(LOGINFO, "GUIWindow DoRender checkpoint 1");
   // If we're rendering from a different thread, then we should wait for the main
   // app thread to finish AllocResources(), as dynamic resources (images in particular)
   // will try and be allocated from 2 different threads, which causes nasty things
   // to occur.
   if (!m_bAllocated) return;
 
+  CLog::Log(LOGINFO, "GUIWindow DoRender checkpoint 2");
   CServiceBroker::GetWinSystem()->GetGfxContext().SetRenderingResolution(m_coordsRes, m_needsScaling);
 
+  CLog::Log(LOGINFO, "GUIWindow DoRender checkpoint 3");
   CServiceBroker::GetWinSystem()->GetGfxContext().AddGUITransform();
+  CLog::Log(LOGINFO, "GUIWindow DoRender checkpoint 4");
   CGUIControlGroup::DoRender();
+  CLog::Log(LOGINFO, "GUIWindow DoRender checkpoint 5");
   CServiceBroker::GetWinSystem()->GetGfxContext().RemoveTransform();
 
+  CLog::Log(LOGINFO, "GUIWindow DoRender checkpoint 6");
   if (CGUIControlProfiler::IsRunning()) CGUIControlProfiler::Instance().EndFrame();
 }
 
@@ -1074,10 +1080,15 @@ void CGUIWindow::RunUnloadActions() const
 
 void CGUIWindow::ClearBackground()
 {
+  CLog::Log(LOGINFO, "ClearBackground checkpoint 1");
   m_clearBackground.Update();
+  CLog::Log(LOGINFO, "ClearBackground checkpoint 2");
   UTILS::COLOR::Color color = m_clearBackground;
   if (color)
+  {
+    CLog::Log(LOGINFO, "ClearBackground checkpoint 3");
     CServiceBroker::GetWinSystem()->GetGfxContext().Clear(color);
+  }
 }
 
 void CGUIWindow::SetID(int id)
