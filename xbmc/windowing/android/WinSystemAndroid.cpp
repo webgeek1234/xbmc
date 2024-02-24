@@ -12,6 +12,8 @@
 #include "ServiceBroker.h"
 #include "WinEventsAndroid.h"
 #include "addons/interfaces/platform/android/System.h"
+#include "application/ApplicationComponents.h"
+#include "application/ApplicationPowerHandling.h"
 #include "cores/RetroPlayer/process/android/RPProcessInfoAndroid.h"
 #include "cores/RetroPlayer/rendering/VideoRenderers/RPRendererOpenGLES.h"
 #include "cores/VideoPlayer/DVDCodecs/Audio/DVDAudioCodecAndroidMediaCodec.h"
@@ -224,6 +226,8 @@ void CWinSystemAndroid::SetHdmiState(bool connected)
 {
   std::unique_lock<CCriticalSection> lock(m_resourceSection);
   CLog::Log(LOGDEBUG, "CWinSystemAndroid::SetHdmiState: state: {}", static_cast<int>(connected));
+  auto& components = CServiceBroker::GetAppComponents();
+  const auto appPower = components.GetComponent<CApplicationPowerHandling>();
 
   if (connected)
   {
@@ -241,6 +245,8 @@ void CWinSystemAndroid::SetHdmiState(bool connected)
       else
         return;
     }
+
+    appPower->SetRenderGUI(true);
 
     for (auto resource : m_resources)
       resource->OnResetDisplay();

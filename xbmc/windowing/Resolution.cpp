@@ -10,6 +10,8 @@
 
 #include "GraphicContext.h"
 #include "ServiceBroker.h"
+#include "application/ApplicationComponents.h"
+#include "application/ApplicationPowerHandling.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/DisplaySettings.h"
 #include "settings/Settings.h"
@@ -81,6 +83,9 @@ RESOLUTION CResolutionUtils::ChooseBestResolution(float fps, int width, int heig
     }
   }
 
+  auto& components = CServiceBroker::GetAppComponents();
+  const auto appPower = components.GetComponent<CApplicationPowerHandling>();
+  appPower->SetRenderGUI(false);
   CLog::Log(LOGINFO, "Display resolution ADJUST : {} ({}) (weight: {:.3f})",
             CServiceBroker::GetWinSystem()->GetGfxContext().GetResInfo(res).strMode, res, weight);
   return res;
